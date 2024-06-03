@@ -2,6 +2,7 @@ package net.youssef.accountservice;
 
 import net.youssef.accountservice.Entities.BankAccount;
 import net.youssef.accountservice.Repository.BankAccountRepository;
+import net.youssef.accountservice.clients.CustomerRestClient;
 import net.youssef.accountservice.enums.AccountType;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -20,26 +21,33 @@ public class AccountServiceApplication {
         SpringApplication.run(AccountServiceApplication.class, args);
     }
     @Bean
-    CommandLineRunner commandLineRunner(BankAccountRepository bankAccountRepository) {
+    CommandLineRunner commandLineRunner(BankAccountRepository bankAccountRepository,CustomerRestClient customerRestClient) {
         return args -> {
-            BankAccount bankAccount1 = BankAccount.builder()
-                    .accountid(UUID.randomUUID().toString())
-                    .balance(98000)
-                    .Currency("MAD")
-                    .createAt(LocalDate.now())
-                    .type(AccountType.CURRENT_ACCOUNT)
-                    .customerId(Long.valueOf(1))
-                    .build();
-            BankAccount bankAccount=BankAccount.builder()
-                    .accountid(UUID.randomUUID().toString())
-                    .balance(98000)
-                    .Currency("MAD")
-                    .createAt(LocalDate.now())
-                    .type(AccountType.SAVING_ACCOUNT)
-                    .customerId(Long.valueOf(2))
-                    .build();
-            bankAccountRepository.save(bankAccount);
-            bankAccountRepository.save(bankAccount1);
+            customerRestClient.AllCustomers().forEach(c -> {
+                        BankAccount bankAccount1 = BankAccount.builder()
+                                .accountid(UUID.randomUUID().toString())
+                                .balance(Math.random() * 6590)
+                                .Currency("MAD")
+                                .createAt(LocalDate.now())
+                                .type(AccountType.CURRENT_ACCOUNT)
+                                .customerId(c.getId())
+                                .build();
+
+                        BankAccount bankAccount = BankAccount.builder()
+                                .accountid(UUID.randomUUID().toString())
+                                .balance(Math.random() * 7580)
+                                .Currency("MAD")
+                                .createAt(LocalDate.now())
+                                .type(AccountType.SAVING_ACCOUNT)
+                                .customerId(c.getId())
+                                .build();
+                bankAccountRepository.save(bankAccount);
+                bankAccountRepository.save(bankAccount1);
+                    }
+            );
+
+
+
         };
     }
 }
